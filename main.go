@@ -1,13 +1,16 @@
 package main
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"fmt"
+	"os"
+
+	"github.com/getzion/relay/api"
+	"github.com/sirupsen/logrus"
+)
 
 func main() {
-	app := fiber.New()
-
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World 👋!")
-	})
-
-	app.Listen(":3000")
+	server := api.InitDWNServer()
+	host := os.Getenv("HOST")
+	port := os.Getenv("PORT")
+	logrus.Fatal(server.Listen(fmt.Sprintf("%s:%s", host, port)))
 }
