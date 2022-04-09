@@ -6,17 +6,11 @@ import (
 
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/decred/base58"
-	"github.com/getzion/relay/api/dwn"
-	"github.com/getzion/relay/api/errors"
+	"github.com/getzion/relay/api/dwn/errors"
 	. "github.com/getzion/relay/utils"
 	"github.com/lestrrat-go/jwx/jwa"
 	"github.com/lestrrat-go/jwx/jws"
 )
-
-type RequestContext struct {
-	// SchemaManager *schema.SchemaManager
-	Message *dwn.Message
-}
 
 // Get the public key from the attestation DID.
 func (c *RequestContext) GetPublicKey() (*ecdsa.PublicKey, *errors.MessageLevelError) {
