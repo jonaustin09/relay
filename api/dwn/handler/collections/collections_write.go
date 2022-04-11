@@ -1,6 +1,7 @@
 package collections
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -10,12 +11,15 @@ import (
 	"github.com/getzion/relay/api/dwn/errors"
 	"github.com/getzion/relay/api/dwn/handler"
 
-	// . "github.com/getzion/relay/utils"
+	. "github.com/getzion/relay/utils"
 	"github.com/google/uuid"
 )
 
 type ParsedData struct {
-	Model string
+	Model    string
+	Name     string
+	Username string
+	Did      string
 }
 
 func CollectionsWrite(context *handler.RequestContext) ([]string, *errors.MessageLevelError) {
@@ -62,13 +66,35 @@ func CollectionsWrite(context *handler.RequestContext) ([]string, *errors.Messag
 
 	// Ensure this data object has a valid model. (Replacing previous schema handling)
 	var parsedData ParsedData
-	json.Unmarshal([]byte(context.Message.Data), &parsedData)
+	decodedData, _ := base64.StdEncoding.DecodeString(context.Message.Data)
+	// json.Unmarshal([]byte(decodedData), &parsedData)
+
+	if err := json.Unmarshal(decodedData, &parsedData); err != nil {
+		if err.Error() == "unexpected end of JSON input" {
+			decodedData = []byte(string(decodedData) + "\"}")
+			json.Unmarshal(decodedData, &parsedData)
+			Log.Info().Str("wat", string(decodedData)+"\"}").Msg("Retrying with closing brace")
+		} else {
+			Log.Err(err).Str("error msg?", err.Error()).Msg("Error unmarshaling decodedData.")
+			panic(err)
+		}
+	}
+
+	Log.Debug().
+		Str("HM Model", parsedData.Model).
+		Str("Name", parsedData.Name).
+		Str("Did", parsedData.Did).
+		Str("Username", parsedData.Username).
+		Msg("Parsed data model:")
+	Log.Debug().Str("Data", context.Message.Data).Msg("The data...")
+	Log.Debug().Str("Method", context.Message.Descriptor.Method).Msg("The descriptor method")
+
 	modelHandler, err := context.ModelManager.GetModelHandler(parsedData.Model)
 	if err != nil {
 		return nil, errors.NewMessageLevelError(400, err.Error(), err)
 	}
 
-	data, err := modelHandler.Execute([]byte(context.Message.Data), context.Message.Descriptor.Method)
+	data, err := modelHandler.Execute(decodedData, context.Message.Descriptor.Method)
 	if err != nil {
 		return nil, errors.NewMessageLevelError(400, err.Error(), err)
 	}
