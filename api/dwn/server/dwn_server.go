@@ -10,7 +10,7 @@ import (
 	"github.com/getzion/relay/api/models"
 	"github.com/sirupsen/logrus"
 
-	. "github.com/getzion/relay/utils"
+	// . "github.com/getzion/relay/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -75,8 +75,8 @@ func (dwnServer *DWNServer) Process(ctx *fiber.Ctx) error {
 			Message:      message,
 		}
 
-		pubKey, _ := context.GetPublicKey()
-		verified, _ := context.VerifyRequest(pubKey)
+		// pubKey, _ := context.GetPublicKey()
+		// verified, _ := context.VerifyRequest(pubKey)
 
 		reply.MessageId = "Placeholder1"
 
@@ -106,7 +106,7 @@ func (dwnServer *DWNServer) Process(ctx *fiber.Ctx) error {
 		if entry != nil {
 			reply.Entries = entry
 		}
-		Log.Info().Bool("verified", verified).Msg("Processed valid request")
+		// Log.Info().Bool("verified", verified).Msg("Processed valid request")
 		reply.Status.Code = 200
 		reply.Status.Message = errors.MessageSuccessfulMessage
 		response.Replies = append(response.Replies, reply)

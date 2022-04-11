@@ -14,7 +14,7 @@ import (
 func main() {
 	validator.InitValidator()
 
-	storage, err := storage.NewStorage("mysql")
+	storage, err := storage.NewStorage("threadsdb")
 	if err != nil {
 		logrus.Panic(err)
 	}
